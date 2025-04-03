@@ -14,7 +14,7 @@ load_dotenv()
 
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 USE_GOOGLE_SHEETS = True
-GOOGLE_SHEET_NAME = "Test Anxiety Responses"
+GOOGLE_SHEET_NAME = os.getenv("GOOGLE_SHEET_NAME")
 SURVEY_EXPIRY_TIME = 180  # 3 minutes
 
 bot = Bot(token=BOT_TOKEN)
