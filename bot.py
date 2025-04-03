@@ -7,8 +7,12 @@ from aiogram.filters import Command
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import time
+from dotenv import load_dotenv
+import os
 
-BOT_TOKEN = "7713217788:AAHg12kYPdep-UGKRGYetGO9rJIPL1JUHyA"
+load_dotenv()
+
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 USE_GOOGLE_SHEETS = True
 GOOGLE_SHEET_NAME = "Test Anxiety Responses"
 SURVEY_EXPIRY_TIME = 180  # 3 minutes
