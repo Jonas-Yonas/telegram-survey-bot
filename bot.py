@@ -48,54 +48,70 @@ except Exception as e:
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
-# Google Sheets setup
+# Google Sheets setup with full error handling
 if USE_GOOGLE_SHEETS:
     try:
+        # 1. Authentication
         scope = [
             "https://www.googleapis.com/auth/spreadsheets",
             "https://www.googleapis.com/auth/drive"
         ]
-        
         creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_json, scope)
         client = gspread.authorize(creds)
         
-        # Debug: Print all available spreadsheets
-        try:
-            all_sheets = client.openall()
-            print("Available spreadsheets:")
-            for s in all_sheets:
-                print(f"- {s.title} (ID: {s.id})")
-        except Exception as e:
-            print(f"Couldn't list spreadsheets: {str(e)}")
+        print("✅ Successfully authenticated with Google Sheets API")
+        print(f"Service account: {credentials_json['client_email']}")
 
-        # Try multiple ways to access the sheet
+        # 2. Spreadsheet access with multiple fallbacks
         try:
-            # Method 1: By exact title
-            sheet = client.open(GOOGLE_SHEET_NAME).Sheet1
+            # Method 1: Try by exact title first
+            spreadsheet = client.open(GOOGLE_SHEET_NAME)
+            print(f"📊 Found spreadsheet by name: {GOOGLE_SHEET_NAME}")
         except gspread.SpreadsheetNotFound:
             try:
-                # Method 2: By URL (if you have it)
+                # Method 2: Try by URL if available
                 SPREADSHEET_URL = os.getenv("SPREADSHEET_URL")
                 if SPREADSHEET_URL:
-                    sheet = client.open_by_url(SPREADSHEET_URL).Sheet1
+                    spreadsheet = client.open_by_url(SPREADSHEET_URL)
+                    print(f"🔗 Found spreadsheet by URL: {SPREADSHEET_URL}")
                 else:
-                    # Method 3: Create new if not found
-                    print(f"Creating new spreadsheet: {GOOGLE_SHEET_NAME}")
-                    sheet = client.create(GOOGLE_SHEET_NAME)
-                    # Share with your service account
-                    sheet.share(credentials_json['client_email'], perm_type='user', role='writer')
-                    sheet = client.open(GOOGLE_SHEET_NAME).Sheet1
+                    # Method 3: Create new spreadsheet
+                    spreadsheet = client.create(GOOGLE_SHEET_NAME)
+                    spreadsheet.share(credentials_json['client_email'], perm_type='user', role='writer')
+                    print(f"🆕 Created new spreadsheet: {GOOGLE_SHEET_NAME}")
             except Exception as e:
-                raise Exception(f"Failed all access methods: {str(e)}")
-        
-        print(f"Successfully accessed spreadsheet: {sheet.title}")
+                raise Exception(f"All spreadsheet access methods failed: {str(e)}")
+
+        # 3. Worksheet access with multiple fallbacks
+        try:
+            # Try to get Sheet1 first
+            sheet = spreadsheet.sheet1
+            print(f"📑 Using first worksheet: {sheet.title}")
+            
+            # Alternative: If you need specific worksheet name
+            # sheet = spreadsheet.worksheet("Data")  # Uncomment if needed
+        except Exception as e:
+            raise Exception(f"Worksheet access failed: {str(e)}")
+
+        # 4. Final verification
+        print("🔍 Verification:")
+        print(f"Spreadsheet Title: {spreadsheet.title}")
+        print(f"Spreadsheet URL: https://docs.google.com/spreadsheets/d/{spreadsheet.id}")
+        print(f"Worksheet Title: {sheet.title}")
+        print(f"Available Worksheets: {[ws.title for ws in spreadsheet.worksheets()]}")
         
     except Exception as e:
-        logging.error(f"Google Sheets setup failed: {str(e)}")
-        # Provide detailed error info
+        logging.error("❌ Critical Google Sheets setup error!")
+        logging.error(f"Error details: {str(e)}")
         if hasattr(e, 'response'):
-            logging.error(f"Response details: {e.response.text}")
-        print(f"Service account email: {credentials_json.get('client_email')}")
+            logging.error(f"API response: {e.response.text}")
+        
+        # Create emergency CSV fallback
+        USE_GOOGLE_SHEETS = False
+        logging.warning("⚠️ Falling back to CSV storage")
+        with open("emergency_fallback.csv", "w") as f:
+            f.write("timestamp,error_details\n")
+            f.write(f"{time.time()},{str(e)}\n")
         raise
 
 
