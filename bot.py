@@ -60,8 +60,8 @@ async def help_command(message: types.Message):
     help_text = (
         "🤖 **Welcome to the Test Anxiety Bot!**\n\n"
         "This bot will ask you a series of questions about test anxiety. "
-        "Please rate how true each statement is for you using the following **5-point scale:**\n\n"
-        "**5  4  3  2  1**\n"
+        "Please rate how true each statement is for you using the following **5-point scale**:\n\n"
+        "**5   4   3   2   1**\n"
         "**Extremely or always true** | **Highly or usually true** | **Moderately or sometimes true** | "
         "**Slightly or seldom true** | **Not at all or never true**\n\n"
         "**📌 Commands:**\n"
@@ -75,6 +75,7 @@ async def help_command(message: types.Message):
         "👉 **Start the survey now:** /start"
     )
     await message.answer(help_text, parse_mode="Markdown")
+
 
 
 @dp.message()
