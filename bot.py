@@ -71,13 +71,13 @@ if USE_GOOGLE_SHEETS:
         # Try multiple ways to access the sheet
         try:
             # Method 1: By exact title
-            sheet = client.open(GOOGLE_SHEET_NAME).sheet1
+            sheet = client.open(GOOGLE_SHEET_NAME).Sheet1
         except gspread.SpreadsheetNotFound:
             try:
                 # Method 2: By URL (if you have it)
                 SPREADSHEET_URL = os.getenv("SPREADSHEET_URL")
                 if SPREADSHEET_URL:
-                    sheet = client.open_by_url(SPREADSHEET_URL).sheet1
+                    sheet = client.open_by_url(SPREADSHEET_URL).Sheet1
                 else:
                     # Method 3: Create new if not found
                     print(f"Creating new spreadsheet: {GOOGLE_SHEET_NAME}")
