@@ -23,26 +23,26 @@ GOOGLE_CREDENTIALS_JSON = os.getenv("GOOGLE_CREDENTIALS_JSON")
 if not BOT_TOKEN:
     raise ValueError("Error: BOT_TOKEN is missing! Set it in Railway Variables.")
 
-# Decode the base64 string to get the JSON content
+# Improved Google Credentials Handling
 try:
-    decoded_credentials = base64.b64decode(GOOGLE_CREDENTIALS_JSON)
-    # Write the decoded content to a temporary file as binary
-    with open("temp_credentials.json", "wb") as f:
-        f.write(decoded_credentials)
+    # Option 1: If credentials are provided as direct JSON string
+    if GOOGLE_CREDENTIALS_JSON.strip().startswith('{'):
+        credentials_json = json.loads(GOOGLE_CREDENTIALS_JSON)
+    # Option 2: If credentials are base64 encoded
+    else:
+        decoded_credentials = base64.b64decode(GOOGLE_CREDENTIALS_JSON)
+        credentials_json = json.loads(decoded_credentials.decode('utf-8'))
+    
+    # Initialize Google Sheets directly with the JSON dict
+    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_json, scope)
+    client = gspread.authorize(creds)
+    sheet = client.open(GOOGLE_SHEET_NAME).sheet1
+    
+    print("Successfully initialized Google Sheets connection")
 except Exception as e:
-    logging.error(f"Error decoding Google credentials: {e}")
+    logging.error(f"Error setting up Google Sheets: {e}")
     raise
-
-# Now, load the credentials file from the binary content
-try:
-    # Now that the file is written correctly, load it using json
-    with open("temp_credentials.json", "r") as f:
-        credentials_json = json.load(f)
-    print("Successfully loaded JSON credentials:", credentials_json)
-except json.JSONDecodeError as e:
-    logging.error(f"Error decoding JSON from credentials file: {e}")
-    raise
-
 
 # Initialize the bot
 bot = Bot(token=BOT_TOKEN)
