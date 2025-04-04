@@ -25,40 +25,49 @@ print(f"  - GOOGLE_SHEET_NAME: {os.getenv('GOOGLE_SHEET_NAME')}")
 print(f"  - SPREADSHEET_URL: {'Set' if os.getenv('SPREADSHEET_URL') else 'Not set'}")
 print("="*50 + "\n")
 
+
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 USE_GOOGLE_SHEETS = True
 GOOGLE_SHEET_NAME = os.getenv("GOOGLE_SHEET_NAME")
 SURVEY_EXPIRY_TIME = 180  # 3 minutes
 GOOGLE_CREDENTIALS_JSON = os.getenv("GOOGLE_CREDENTIALS_JSON")
 
+# Validate critical environment variables
 if not BOT_TOKEN:
-    raise ValueError("Error: BOT_TOKEN is missing! Set it in Railway Variables.")
+    raise ValueError("BOT_TOKEN is missing! Set it in Railway Variables.")
+if not GOOGLE_CREDENTIALS_JSON:
+    raise ValueError("GOOGLE_CREDENTIALS_JSON is missing! Set it in Railway Variables.")
+if not GOOGLE_SHEET_NAME:
+    raise ValueError("GOOGLE_SHEET_NAME is missing! Set it in Railway Variables.")
+
+print("✅ Environment variables validated")
 
 # Improved Google Credentials Handling
 try:
-    # Option 1: If credentials are provided as direct JSON string
-    if GOOGLE_CREDENTIALS_JSON.strip().startswith('{'):
-        credentials_json = json.loads(GOOGLE_CREDENTIALS_JSON)
-    # Option 2: If credentials are base64 encoded
+    # Handle both direct JSON and base64 encoded credentials
+    if GOOGLE_CREDENTIALS_JSON and isinstance(GOOGLE_CREDENTIALS_JSON, str):
+        if GOOGLE_CREDENTIALS_JSON.strip().startswith('{'):
+            credentials_json = json.loads(GOOGLE_CREDENTIALS_JSON)
+        else:
+            decoded = base64.b64decode(GOOGLE_CREDENTIALS_JSON)
+            credentials_json = json.loads(decoded.decode('utf-8'))
     else:
-        decoded_credentials = base64.b64decode(GOOGLE_CREDENTIALS_JSON)
-        credentials_json = json.loads(decoded_credentials.decode('utf-8'))
-    
-    # Initialize Google Sheets directly with the JSON dict
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_json, scope)
-    client = gspread.authorize(creds)
-    spreadsheet_id = "1ABCdEfGhIjKlMnOpQRstUvWxyz1234567890"
-    sheet = client.open_by_key(spreadsheet_id).Sheet1
-    
-    print("Successfully initialized Google Sheets connection")
+        raise ValueError("GOOGLE_CREDENTIALS_JSON is empty or invalid")
+
+    print("✅ Google credentials successfully loaded")
 except Exception as e:
-    logging.error(f"Error setting up Google Sheets: {e}")
+    logging.error(f"❌ Failed to load Google credentials: {str(e)}")
     raise
 
 # Initialize the bot
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
+
+print("\n🔍 Environment Variable Check:")
+print(f"BOT_TOKEN exists: {'Yes' if BOT_TOKEN else 'No'}")
+print(f"GOOGLE_CREDENTIALS_JSON exists: {'Yes' if GOOGLE_CREDENTIALS_JSON else 'No'}")
+print(f"GOOGLE_SHEET_NAME: {GOOGLE_SHEET_NAME}")
+print(f"SPREADSHEET_URL: {os.getenv('SPREADSHEET_URL')}")
 
 # Google Sheets setup with full error handling
 if USE_GOOGLE_SHEETS:
