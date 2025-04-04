@@ -51,28 +51,51 @@ dp = Dispatcher()
 # Google Sheets setup
 if USE_GOOGLE_SHEETS:
     try:
-        scope = ["https://spreadsheets.google.com/feeds", 
-                "https://www.googleapis.com/auth/drive",
-                "https://www.googleapis.com/auth/spreadsheets"]
+        scope = [
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive"
+        ]
         
         creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_json, scope)
         client = gspread.authorize(creds)
         
-        # More robust spreadsheet access
+        # Debug: Print all available spreadsheets
         try:
+            all_sheets = client.openall()
+            print("Available spreadsheets:")
+            for s in all_sheets:
+                print(f"- {s.title} (ID: {s.id})")
+        except Exception as e:
+            print(f"Couldn't list spreadsheets: {str(e)}")
+
+        # Try multiple ways to access the sheet
+        try:
+            # Method 1: By exact title
             sheet = client.open(GOOGLE_SHEET_NAME).sheet1
         except gspread.SpreadsheetNotFound:
-            # Create a new spreadsheet if not found
-            sheet = client.create(GOOGLE_SHEET_NAME)
-            sheet.share(credentials_json['client_email'], perm_type='user', role='writer')
-            sheet = client.open(GOOGLE_SHEET_NAME).sheet1
-            
-        print(f"Successfully accessed spreadsheet: {GOOGLE_SHEET_NAME}")
+            try:
+                # Method 2: By URL (if you have it)
+                SPREADSHEET_URL = os.getenv("SPREADSHEET_URL")
+                if SPREADSHEET_URL:
+                    sheet = client.open_by_url(SPREADSHEET_URL).sheet1
+                else:
+                    # Method 3: Create new if not found
+                    print(f"Creating new spreadsheet: {GOOGLE_SHEET_NAME}")
+                    sheet = client.create(GOOGLE_SHEET_NAME)
+                    # Share with your service account
+                    sheet.share(credentials_json['client_email'], perm_type='user', role='writer')
+                    sheet = client.open(GOOGLE_SHEET_NAME).sheet1
+            except Exception as e:
+                raise Exception(f"Failed all access methods: {str(e)}")
+        
+        print(f"Successfully accessed spreadsheet: {sheet.title}")
         
     except Exception as e:
-        logging.error(f"Error setting up Google Sheets: {str(e)}")
+        logging.error(f"Google Sheets setup failed: {str(e)}")
+        # Provide detailed error info
         if hasattr(e, 'response'):
             logging.error(f"Response details: {e.response.text}")
+        print(f"Service account email: {credentials_json.get('client_email')}")
         raise
 
 
