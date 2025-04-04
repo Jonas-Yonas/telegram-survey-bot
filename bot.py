@@ -23,11 +23,14 @@ if not BOT_TOKEN:
     raise ValueError("Error: BOT_TOKEN is missing! Set it in Railway Variables.")
 
 # Decode the base64 string to get the JSON content
-credentials_json = base64.b64decode(GOOGLE_CREDENTIALS_JSON)
-
-# Write the decoded content to a temporary file
-with open("temp_credentials.json", "wb") as f:
-    f.write(credentials_json)
+try:
+    credentials_json = base64.b64decode(GOOGLE_CREDENTIALS_JSON)
+    # Write the decoded content to a temporary file
+    with open("temp_credentials.json", "wb") as f:
+        f.write(credentials_json)
+except Exception as e:
+    logging.error(f"Error decoding Google credentials: {e}")
+    raise
 
 # Initialize the bot
 bot = Bot(token=BOT_TOKEN)
@@ -35,10 +38,14 @@ dp = Dispatcher()
 
 # Google Sheets setup
 if USE_GOOGLE_SHEETS:
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = ServiceAccountCredentials.from_json_keyfile_name("temp_credentials.json", scope)
-    client = gspread.authorize(creds)
-    sheet = client.open(GOOGLE_SHEET_NAME).sheet1
+    try:
+        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        creds = ServiceAccountCredentials.from_json_keyfile_name("temp_credentials.json", scope)
+        client = gspread.authorize(creds)
+        sheet = client.open(GOOGLE_SHEET_NAME).sheet1
+    except Exception as e:
+        logging.error(f"Error setting up Google Sheets: {e}")
+        raise
 
 CSV_FILE = "responses.csv"
 questions = [
