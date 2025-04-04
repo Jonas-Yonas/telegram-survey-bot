@@ -14,6 +14,16 @@ import json
 
 load_dotenv()
 
+# Debugging header
+print("\n" + "="*50)
+print("🚀 STARTING BOT WITH THESE SETTINGS:")
+print(f"📅 {time.ctime()}")
+print(f"🐍 Python {sys.version}")
+print(f"📜 Environment Variables:")
+print(f"  - GOOGLE_SHEET_NAME: {os.getenv('GOOGLE_SHEET_NAME')}")
+print(f"  - SPREADSHEET_URL: {'Set' if os.getenv('SPREADSHEET_URL') else 'Not set'}")
+print("="*50 + "\n")
+
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 USE_GOOGLE_SHEETS = True
 GOOGLE_SHEET_NAME = os.getenv("GOOGLE_SHEET_NAME")
