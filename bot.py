@@ -12,10 +12,13 @@ import os
 
 load_dotenv()
 
-BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 USE_GOOGLE_SHEETS = True
 GOOGLE_SHEET_NAME = os.getenv("GOOGLE_SHEET_NAME")
 SURVEY_EXPIRY_TIME = 180  # 3 minutes
+
+if not BOT_TOKEN:
+    raise ValueError("Error: BOT_TOKEN is missing! Set it in Railway Variables.")
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
