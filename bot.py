@@ -10,6 +10,7 @@ import time
 from dotenv import load_dotenv
 import os
 import base64
+import json
 
 load_dotenv()
 
@@ -24,10 +25,15 @@ if not BOT_TOKEN:
 
 # Decode the base64 string to get the JSON content
 try:
-    credentials_json = base64.b64decode(GOOGLE_CREDENTIALS_JSON)
+    decoded_credentials = base64.b64decode(GOOGLE_CREDENTIALS_JSON)
+    # Ensure the decoded bytes are valid JSON
+    credentials_json_str = decoded_credentials.decode('utf-8')
+    json.loads(credentials_json_str)  # Try loading JSON to check for validity
+
     # Write the decoded content to a temporary file
-    with open("temp_credentials.json", "wb") as f:
-        f.write(credentials_json)
+    with open("temp_credentials.json", "w") as f:
+        f.write(credentials_json_str)
+
 except Exception as e:
     logging.error(f"Error decoding Google credentials: {e}")
     raise
@@ -55,8 +61,8 @@ questions = [
     "I lose focus on important exams, and I cannot remember material that I knew before the exam.",
     "I finally remember the answer to exam questions after the exam is already over.",
     "I worry so much before a major exam that I am too worn out to do my best on the exam.",
-    "I feel out of sorts or not really myself when I take important exams.", 
-    "I find that my mind sometimes wanders when I am taking important exams.", 
+    "I feel out of sorts or not really myself when I take important exams.",
+    "I find that my mind sometimes wanders when I am taking important exams.",
     "After an exam, I worry about whether I did well enough.",
     "I struggle with writing assignments, or avoid them as long as I can. I feel that whatever I do will not be good enough."
 ]
