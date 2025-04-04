@@ -51,13 +51,30 @@ dp = Dispatcher()
 # Google Sheets setup
 if USE_GOOGLE_SHEETS:
     try:
-        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        creds = ServiceAccountCredentials.from_json_keyfile_name("temp_credentials.json", scope)
+        scope = ["https://spreadsheets.google.com/feeds", 
+                "https://www.googleapis.com/auth/drive",
+                "https://www.googleapis.com/auth/spreadsheets"]
+        
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_json, scope)
         client = gspread.authorize(creds)
-        sheet = client.open(GOOGLE_SHEET_NAME).sheet1
+        
+        # More robust spreadsheet access
+        try:
+            sheet = client.open(GOOGLE_SHEET_NAME).sheet1
+        except gspread.SpreadsheetNotFound:
+            # Create a new spreadsheet if not found
+            sheet = client.create(GOOGLE_SHEET_NAME)
+            sheet.share(credentials_json['client_email'], perm_type='user', role='writer')
+            sheet = client.open(GOOGLE_SHEET_NAME).sheet1
+            
+        print(f"Successfully accessed spreadsheet: {GOOGLE_SHEET_NAME}")
+        
     except Exception as e:
-        logging.error(f"Error setting up Google Sheets: {e}")
+        logging.error(f"Error setting up Google Sheets: {str(e)}")
+        if hasattr(e, 'response'):
+            logging.error(f"Response details: {e.response.text}")
         raise
+
 
 CSV_FILE = "responses.csv"
 questions = [
