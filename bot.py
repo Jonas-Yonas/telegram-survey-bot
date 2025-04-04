@@ -37,7 +37,7 @@ try:
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
     creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_json, scope)
     client = gspread.authorize(creds)
-    sheet = client.open(GOOGLE_SHEET_NAME).sheet1
+    sheet = client.open(GOOGLE_SHEET_NAME).Data
     
     print("Successfully initialized Google Sheets connection")
 except Exception as e:
@@ -71,20 +71,20 @@ if USE_GOOGLE_SHEETS:
         # Try multiple ways to access the sheet
         try:
             # Method 1: By exact title
-            sheet = client.open(GOOGLE_SHEET_NAME).Sheet1
+            sheet = client.open(GOOGLE_SHEET_NAME).Data
         except gspread.SpreadsheetNotFound:
             try:
                 # Method 2: By URL (if you have it)
                 SPREADSHEET_URL = os.getenv("SPREADSHEET_URL")
                 if SPREADSHEET_URL:
-                    sheet = client.open_by_url(SPREADSHEET_URL).Sheet1
+                    sheet = client.open_by_url(SPREADSHEET_URL).Data
                 else:
                     # Method 3: Create new if not found
                     print(f"Creating new spreadsheet: {GOOGLE_SHEET_NAME}")
                     sheet = client.create(GOOGLE_SHEET_NAME)
                     # Share with your service account
                     sheet.share(credentials_json['client_email'], perm_type='user', role='writer')
-                    sheet = client.open(GOOGLE_SHEET_NAME).sheet1
+                    sheet = client.open(GOOGLE_SHEET_NAME).Data
             except Exception as e:
                 raise Exception(f"Failed all access methods: {str(e)}")
         
