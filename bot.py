@@ -69,6 +69,10 @@ print(f"GOOGLE_CREDENTIALS_JSON exists: {'Yes' if GOOGLE_CREDENTIALS_JSON else '
 print(f"GOOGLE_SHEET_NAME: {GOOGLE_SHEET_NAME}")
 print(f"SPREADSHEET_URL: {os.getenv('SPREADSHEET_URL')}")
 
+print("\n🔍 Credentials Check:")
+if GOOGLE_CREDENTIALS_JSON:
+    print(f"First 50 chars: {GOOGLE_CREDENTIALS_JSON[:50]}...")
+
 # Google Sheets setup with full error handling
 if USE_GOOGLE_SHEETS:
     try:
