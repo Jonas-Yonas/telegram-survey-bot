@@ -9,6 +9,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 import time
 from dotenv import load_dotenv
 import os
+import base64
 
 load_dotenv()
 
@@ -16,16 +17,26 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 USE_GOOGLE_SHEETS = True
 GOOGLE_SHEET_NAME = os.getenv("GOOGLE_SHEET_NAME")
 SURVEY_EXPIRY_TIME = 180  # 3 minutes
+GOOGLE_CREDENTIALS_JSON = os.getenv("GOOGLE_CREDENTIALS_JSON")
 
 if not BOT_TOKEN:
     raise ValueError("Error: BOT_TOKEN is missing! Set it in Railway Variables.")
 
+# Decode the base64 string to get the JSON content
+credentials_json = base64.b64decode(GOOGLE_CREDENTIALS_JSON)
+
+# Write the decoded content to a temporary file
+with open("temp_credentials.json", "wb") as f:
+    f.write(credentials_json)
+
+# Initialize the bot
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
+# Google Sheets setup
 if USE_GOOGLE_SHEETS:
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+    creds = ServiceAccountCredentials.from_json_keyfile_name("temp_credentials.json", scope)
     client = gspread.authorize(creds)
     sheet = client.open(GOOGLE_SHEET_NAME).sheet1
 
@@ -76,8 +87,6 @@ async def help_command(message: types.Message):
     )
     await message.answer(help_text, parse_mode="Markdown")
 
-
-
 @dp.message()
 async def handle_age(message: types.Message):
     user_id = message.from_user.id
@@ -85,7 +94,7 @@ async def handle_age(message: types.Message):
         if message.text.isdigit():
             user_responses[user_id]["age"] = int(message.text)
             await message.answer("Please select your sex:", reply_markup=InlineKeyboardMarkup(
-                inline_keyboard=[
+                inline_keyboard=[ 
                     [InlineKeyboardButton(text="Male", callback_data="male"),
                      InlineKeyboardButton(text="Female", callback_data="female"),
                      InlineKeyboardButton(text="Other", callback_data="other")]
