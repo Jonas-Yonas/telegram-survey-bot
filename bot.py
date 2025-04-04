@@ -28,11 +28,16 @@ if USE_GOOGLE_SHEETS:
 
 CSV_FILE = "responses.csv"
 questions = [
-    "I feel anxious before a test.",
-    "During a test, I have difficulty concentrating.",
-    "I worry about failing tests.",
-    "I feel my heart racing during exams.",
-    "I feel confident while taking a test."
+    "The closer I am to a major exam, the harder it is for me to concentrate on the material.",
+    "When I study, I worry that I will not remember the material on the exam.",
+    "During important exams, I think that I am doing awful or that I may fail.",
+    "I lose focus on important exams, and I cannot remember material that I knew before the exam.",
+    "I finally remember the answer to exam questions after the exam is already over.",
+    "I worry so much before a major exam that I am too worn out to do my best on the exam.",
+    "I feel out of sorts or not really myself when I take important exams.", 
+    "I find that my mind sometimes wanders when I am taking important exams.", 
+    "After an exam, I worry about whether I did well enough.",
+    "I struggle with writing assignments, or avoid them as long as I can. I feel that whatever I do will not be good enough."
 ]
 user_responses = {}
 
@@ -45,6 +50,29 @@ async def start(message: types.Message):
     user_id = message.from_user.id
     user_responses[user_id] = {"responses": [], "start_time": time.time()}
     await message.answer("Please enter your age:")
+
+# Help Command Handler
+@dp.message(Command("help"))
+async def help_command(message: types.Message):
+    help_text = (
+        "🤖 **Welcome to the Test Anxiety Bot!**\n\n"
+        "This bot will ask you a series of questions about test anxiety. "
+        "Please rate how true each statement is for you using the following **5-point scale:**\n\n"
+        "**5  4  3  2  1**\n"
+        "**Extremely or always true** | **Highly or usually true** | **Moderately or sometimes true** | "
+        "**Slightly or seldom true** | **Not at all or never true**\n\n"
+        "**📌 Commands:**\n"
+        "🔹 `/start` - Begin the survey\n"
+        "🔹 `/help` - Show this help message\n\n"
+        "**📋 How it works:**\n"
+        "1️⃣ The bot will ask a series of statements about test anxiety.\n"
+        "2️⃣ You will rate each statement based on the **5-point scale** above.\n"
+        "3️⃣ Your responses are completely **anonymous** and stored securely.\n\n"
+        "Thank you for participating! 😊\n"
+        "👉 **Start the survey now:** /start"
+    )
+    await message.answer(help_text, parse_mode="Markdown")
+
 
 @dp.message()
 async def handle_age(message: types.Message):
