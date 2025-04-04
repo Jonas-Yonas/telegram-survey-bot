@@ -37,7 +37,8 @@ try:
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
     creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_json, scope)
     client = gspread.authorize(creds)
-    sheet = client.open(GOOGLE_SHEET_NAME).Sheet1
+    spreadsheet_id = "1ABCdEfGhIjKlMnOpQRstUvWxyz1234567890"
+    sheet = client.open_by_key(spreadsheet_id).Sheet1
     
     print("Successfully initialized Google Sheets connection")
 except Exception as e:
