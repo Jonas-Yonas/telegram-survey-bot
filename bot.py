@@ -26,17 +26,23 @@ if not BOT_TOKEN:
 # Decode the base64 string to get the JSON content
 try:
     decoded_credentials = base64.b64decode(GOOGLE_CREDENTIALS_JSON)
-    # Ensure the decoded bytes are valid JSON
-    credentials_json_str = decoded_credentials.decode('utf-8')
-    json.loads(credentials_json_str)  # Try loading JSON to check for validity
-
-    # Write the decoded content to a temporary file
-    with open("temp_credentials.json", "w") as f:
-        f.write(credentials_json_str)
-
+    # Write the decoded content to a temporary file as binary
+    with open("temp_credentials.json", "wb") as f:
+        f.write(decoded_credentials)
 except Exception as e:
     logging.error(f"Error decoding Google credentials: {e}")
     raise
+
+# Now, load the credentials file from the binary content
+try:
+    # Now that the file is written correctly, load it using json
+    with open("temp_credentials.json", "r") as f:
+        credentials_json = json.load(f)
+    print("Successfully loaded JSON credentials:", credentials_json)
+except json.JSONDecodeError as e:
+    logging.error(f"Error decoding JSON from credentials file: {e}")
+    raise
+
 
 # Initialize the bot
 bot = Bot(token=BOT_TOKEN)
