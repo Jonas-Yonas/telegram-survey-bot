@@ -133,9 +133,9 @@ async def start(message: types.Message):
         "Your responses are completely **anonymous** and will help in collecting valuable data for research purposes.\n\n"
         "The bot uses a simple 5-point scale to rate each question.\n\n"
         "Once you click **Start**, you'll begin the survey. The bot will guide you through the process!\n\n"
-        "We appreciate your participation in this research! 😊"
+        "We appreciate your participation in this research! 😊\n\n"
         "Your answers are completely anonymous. 📊😊\n\n"
-        "👨‍💻 Credit to: Jonas Yonas, developed by @Nexusoft\_admin\n\n"
+        "👨‍💻 Credit to: Jonas Yonas, developed by @Nexusoft_admin\n\n"
     )
 
     # Send the intro message
