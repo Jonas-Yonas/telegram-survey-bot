@@ -1,4 +1,3 @@
-import sys
 import logging
 import csv
 import asyncio
@@ -14,16 +13,6 @@ import base64
 import json
 
 load_dotenv()
-
-# Debugging header
-print("\n" + "="*50)
-print("🚀 STARTING BOT WITH THESE SETTINGS:")
-print(f"📅 {time.ctime()}")
-print(f"🐍 Python {sys.version}")
-print(f"📜 Environment Variables:")
-print(f"  - GOOGLE_SHEET_NAME: {os.getenv('GOOGLE_SHEET_NAME')}")
-print(f"  - SPREADSHEET_URL: {'Set' if os.getenv('SPREADSHEET_URL') else 'Not set'}")
-print("="*50 + "\n")
 
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
@@ -63,16 +52,6 @@ except Exception as e:
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
-print("\n🔍 Environment Variable Check:")
-print(f"BOT_TOKEN exists: {'Yes' if BOT_TOKEN else 'No'}")
-print(f"GOOGLE_CREDENTIALS_JSON exists: {'Yes' if GOOGLE_CREDENTIALS_JSON else 'No'}")
-print(f"GOOGLE_SHEET_NAME: {GOOGLE_SHEET_NAME}")
-print(f"SPREADSHEET_URL: {os.getenv('SPREADSHEET_URL')}")
-
-print("\n🔍 Credentials Check:")
-if GOOGLE_CREDENTIALS_JSON:
-    print(f"First 50 chars: {GOOGLE_CREDENTIALS_JSON[:50]}...")
-
 # Google Sheets setup with full error handling
 if USE_GOOGLE_SHEETS:
     try:
@@ -84,8 +63,6 @@ if USE_GOOGLE_SHEETS:
         creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_json, scope)
         client = gspread.authorize(creds)
         
-        print("✅ Successfully authenticated with Google Sheets API")
-        print(f"Service account: {credentials_json['client_email']}")
 
         # 2. Spreadsheet access with multiple fallbacks
         try:
@@ -117,13 +94,6 @@ if USE_GOOGLE_SHEETS:
             # sheet = spreadsheet.worksheet("Data")  # Uncomment if needed
         except Exception as e:
             raise Exception(f"Worksheet access failed: {str(e)}")
-
-        # 4. Final verification
-        print("🔍 Verification:")
-        print(f"Spreadsheet Title: {spreadsheet.title}")
-        print(f"Spreadsheet URL: https://docs.google.com/spreadsheets/d/{spreadsheet.id}")
-        print(f"Worksheet Title: {sheet.title}")
-        print(f"Available Worksheets: {[ws.title for ws in spreadsheet.worksheets()]}")
         
     except Exception as e:
         logging.error("❌ Critical Google Sheets setup error!")
