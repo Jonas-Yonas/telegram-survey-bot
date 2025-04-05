@@ -195,6 +195,40 @@ async def handle_response(call: types.CallbackQuery):
     else:
         await save_response(user_id)
 
+# async def save_response(user_id):
+#     if user_id not in user_responses or time.time() - user_responses[user_id]["start_time"] > SURVEY_EXPIRY_TIME:
+#         user_responses.pop(user_id, None)
+#         await bot.send_message(user_id, "Your session has expired. Please restart with /start.")
+#         return
+
+#     completion_time = time.time() - user_responses[user_id]["start_time"]
+#     response_data = [
+#         str(user_id),
+#         str(user_responses[user_id].get("age", "N/A")),
+#         str(user_responses[user_id].get("sex", "N/A"))
+#     ] + user_responses[user_id]["responses"] + [str(completion_time)]
+
+#     # Ensure response fits A-K (11 columns max)
+#     response_data = response_data[:14]
+
+#     if USE_GOOGLE_SHEETS:
+#         try:
+#             cell = sheet.find(str(user_id))
+#             if cell:
+#                 sheet.update(range_name=f"A{cell.row}:K{cell.row}", values=[response_data])
+#             else:
+#                 sheet.append_row(response_data)
+#         except APIError as e:
+#             print(f"API error while saving response: {e}")
+#             sheet.append_row(response_data)
+#     else:
+#         with open(CSV_FILE, mode="a", newline="") as file:
+#             writer = csv.writer(file)
+#             writer.writerow(response_data)
+
+#     del user_responses[user_id]
+#     await bot.send_message(user_id, "Thank you for completing the test! Your responses have been saved.")
+
 async def save_response(user_id):
     if user_id not in user_responses or time.time() - user_responses[user_id]["start_time"] > SURVEY_EXPIRY_TIME:
         user_responses.pop(user_id, None)
@@ -208,16 +242,23 @@ async def save_response(user_id):
         str(user_responses[user_id].get("sex", "N/A"))
     ] + user_responses[user_id]["responses"] + [str(completion_time)]
 
-    # Ensure response fits A-K (11 columns max)
+    # Ensure response fits A-N (14 columns max)
     response_data = response_data[:14]
+
+    print(f"Saving response for user {user_id}: {response_data}")  # Add debug log
 
     if USE_GOOGLE_SHEETS:
         try:
+            # Find the row by user ID (Column A)
             cell = sheet.find(str(user_id))
             if cell:
-                sheet.update(range_name=f"A{cell.row}:K{cell.row}", values=[response_data])
+                # Update existing row if user ID is found
+                sheet.update(range_name=f"A{cell.row}:N{cell.row}", values=[response_data])
+                print(f"Updated existing entry for user {user_id}")
             else:
+                # Append new row if user ID is not found
                 sheet.append_row(response_data)
+                print(f"Added new entry for user {user_id}")
         except APIError as e:
             print(f"API error while saving response: {e}")
             sheet.append_row(response_data)
@@ -228,6 +269,7 @@ async def save_response(user_id):
 
     del user_responses[user_id]
     await bot.send_message(user_id, "Thank you for completing the test! Your responses have been saved.")
+
 
 async def cleanup_expired_sessions():
     while True:
