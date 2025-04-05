@@ -95,13 +95,7 @@ if USE_GOOGLE_SHEETS:
         raise
 
 CSV_FILE = "responses.csv"
-SURVEY_INVITE_TEXT = (
-    "🚀 **Take our Test Anxiety Survey!** 🚀\n"
-    "Help us collect data for research.\n\n"
-    "Click here 👉 https://t.me/@TestAnxietyBot and start the survey in seconds!\n"
-    "Your answers are completely anonymous. 📊😊\n\n"
-    "👨‍💻 Created by Jonas Yonas, developed by @Nexusoft_admin"
-)
+
 questions = [
     "The closer I am to a major exam, the harder it is for me to concentrate on the material.",
     "When I study, I worry that I will not remember the material on the exam.",
@@ -215,7 +209,7 @@ async def save_response(user_id):
     ] + user_responses[user_id]["responses"] + [str(completion_time)]
 
     # Ensure response fits A-K (11 columns max)
-    response_data = response_data[:11]
+    response_data = response_data[:14]
 
     if USE_GOOGLE_SHEETS:
         try:
