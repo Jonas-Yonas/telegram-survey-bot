@@ -133,19 +133,58 @@ async def start(message: types.Message):
         "Your responses are completely **anonymous** and will help in collecting valuable data for research purposes.\n\n"
         "The bot uses a simple 5-point scale to rate each question.\n\n"
         "Once you click **Start**, you'll begin the survey. The bot will guide you through the process!\n\n"
-        "We appreciate your participation in this research! 😊\n\n"
+        "We appreciate your participation in this research! 😊"
         "Your answers are completely anonymous. 📊😊\n\n"
         "👨‍💻 Credit to: Jonas Yonas, developed by @Nexusoft_admin\n\n"
     )
 
     # Send the intro message
-    await message.answer(intro_text, parse_mode="Markdown")
+    try:
+        await message.answer(intro_text, parse_mode="MarkdownV2")  # Use MarkdownV2 to be more lenient with escaping
+    except Exception as e:
+        await message.answer("Sorry, there was an error with the message formatting. Please try again.")
+        print(f"Error sending intro message: {e}")
 
     # Now show the Start button after the intro message
     await message.answer(
         "When you're ready, click **Start** to begin the survey:",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Start", callback_data="start_survey")]])
     )
+
+@dp.callback_query(lambda call: call.data == "start_survey")
+async def start_survey(call: types.CallbackQuery):
+    user_id = call.from_user.id
+    await call.answer()  # Acknowledge the callback
+    await call.message.answer("Please enter your age:")  # Continue with survey
+
+
+
+# @dp.message(Command("start"))
+# async def start(message: types.Message):
+#     user_id = message.from_user.id
+#     user_responses[user_id] = {"responses": [], "start_time": time.time()}
+
+#     # Introductory text
+#     intro_text = (
+#         "🤖 **What can this bot do?**\n\n"
+#         "The Test Anxiety Bot helps you assess your test anxiety levels.\n\n"
+#         "It asks you a series of questions about your experiences with exam stress. "
+#         "Your responses are completely **anonymous** and will help in collecting valuable data for research purposes.\n\n"
+#         "The bot uses a simple 5-point scale to rate each question.\n\n"
+#         "Once you click **Start**, you'll begin the survey. The bot will guide you through the process!\n\n"
+#         "We appreciate your participation in this research! 😊\n\n"
+#         "Your answers are completely anonymous. 📊😊\n\n"
+#         "👨‍💻 Credit to: Jonas Yonas, developed by @Nexusoft_admin\n\n"
+#     )
+
+#     # Send the intro message
+#     await message.answer(intro_text, parse_mode="Markdown")
+
+#     # Now show the Start button after the intro message
+#     await message.answer(
+#         "When you're ready, click **Start** to begin the survey:",
+#         reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Start", callback_data="start_survey")]])
+#     )
 
 @dp.callback_query(lambda call: call.data == "start_survey")
 async def start_survey(call: types.CallbackQuery):
