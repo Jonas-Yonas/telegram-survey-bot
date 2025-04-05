@@ -95,6 +95,13 @@ if USE_GOOGLE_SHEETS:
         raise
 
 CSV_FILE = "responses.csv"
+SURVEY_INVITE_TEXT = (
+    "🚀 **Take our Test Anxiety Survey!** 🚀\n"
+    "Help us collect data for research.\n\n"
+    "Click here 👉 https://t.me/@TestAnxietyBot and start the survey in seconds!\n"
+    "Your answers are completely anonymous. 📊😊\n\n"
+    "👨‍💻 Created by Jonas Yonas, developed by @Nexusoft_admin"
+)
 questions = [
     "The closer I am to a major exam, the harder it is for me to concentrate on the material.",
     "When I study, I worry that I will not remember the material on the exam.",
@@ -125,15 +132,19 @@ async def help_command(message: types.Message):
         "🤖 **Welcome to the Test Anxiety Bot!**\n\n"
         "This bot will ask you a series of questions about test anxiety. "
         "Please rate how true each statement is for you using the following **5-point scale**:\n\n"
-        "**5   4   3   2   1**\n"
-        "**Extremely or always true** | **Highly or usually true** | **Moderately or sometimes true** | "
-        "**Slightly or seldom true** | **Not at all or never true**\n\n"
+        "```\n"
+        "  5️⃣  Extremely or always true\n"
+        "  4️⃣  Highly or usually true\n"
+        "  3️⃣  Moderately or sometimes true\n"
+        "  2️⃣  Slightly or seldom true\n"
+        "  1️⃣  Not at all or never true\n"
+        "```\n"
         "**📌 Commands:**\n"
         "🔹 `/start` - Begin the survey\n"
         "🔹 `/help` - Show this help message\n\n"
         "**📋 How it works:**\n"
         "1️⃣ The bot will ask a series of statements about test anxiety.\n"
-        "2️⃣ You will rate each statement based on the **5-point scale** above.\n"
+        "2️⃣ You will rate each statement based on the 5-point scale above.\n"
         "3️⃣ Your responses are completely **anonymous** and stored securely.\n\n"
         "Thank you for participating! 😊\n"
         "👉 **Start the survey now:** /start"
