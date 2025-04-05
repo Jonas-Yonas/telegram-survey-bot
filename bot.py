@@ -121,11 +121,6 @@ def create_rating_keyboard():
     buttons = [InlineKeyboardButton(text=str(i), callback_data=str(i)) for i in range(5, 0, -1)]
     return InlineKeyboardMarkup(inline_keyboard=[buttons])
 
-# @dp.message(Command("start"))
-# async def start(message: types.Message):
-#     user_id = message.from_user.id
-#     user_responses[user_id] = {"responses": [], "start_time": time.time()}
-#     await message.answer("Please enter your age:")
 
 @dp.message(Command("start"))
 async def start(message: types.Message):
@@ -148,128 +143,6 @@ async def start_survey(call: types.CallbackQuery):
     await call.answer()
     await call.message.delete()  # Clean up the button message
     await call.message.answer("First, please tell me your age:")
-
-# @dp.message(Command("start"))
-# async def start(message: types.Message):
-#     user_id = message.from_user.id
-#     user_responses[user_id] = {"responses": [], "start_time": time.time()}
-
-#     # Simplified intro text (MarkdownV2 compatible)
-#     intro_text = (
-#         "🤖 *What can this bot do?*\n\n"
-#         "The Test Anxiety Bot helps you assess your test anxiety levels.\n\n"
-#         "It asks you a series of questions about your experiences with exam stress\. "
-#         "Your responses are completely *anonymous* and will help in collecting valuable data for research purposes\.\n\n"
-#         "The bot uses a simple 5\-point scale to rate each question\.\n\n"
-#         "Once you click *Start*, you'll begin the survey\. The bot will guide you through the process\!\n\n"
-#         "We appreciate your participation in this research\! 😊\n\n"
-#         "Your answers are completely anonymous\. 📊😊"
-#     )
-
-#     # Send the intro message
-#     try:
-#         await message.answer(intro_text, parse_mode="MarkdownV2")
-#     except Exception as e:
-#         logger.error(f"Error sending intro message: {e}")
-#         # Fallback to plain text if Markdown fails
-#         await message.answer(
-#             "🤖 What can this bot do?\n\n"
-#             "The Test Anxiety Bot helps assess your test anxiety levels through "
-#             "a series of questions. All responses are anonymous.\n\n"
-#             "Click Start to begin when ready!"
-#         )
-
-#     # Show Start button
-#     await message.answer(
-#         "When you're ready:",
-#         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-#             [InlineKeyboardButton(text="▶️ Start Survey", callback_data="start_survey")]
-#         ])
-#     )
-
-# @dp.callback_query(lambda call: call.data == "start_survey")
-# async def start_survey(call: types.CallbackQuery):
-#     user_id = call.from_user.id
-#     await call.answer()  # Acknowledge the callback
-    
-#     # Delete the Start button message for cleaner flow
-#     try:
-#         await call.message.delete()
-#     except Exception as e:
-#         logger.warning(f"Couldn't delete message: {e}")
-    
-#     await call.message.answer("Please enter your age:")  # Start survey
-    
-# @dp.message(Command("start"))
-# async def start(message: types.Message):
-#     user_id = message.from_user.id
-#     user_responses[user_id] = {"responses": [], "start_time": time.time()}
-
-#     # Introductory text
-#     intro_text = (
-#         "🤖 **What can this bot do?**\n\n"
-#         "The Test Anxiety Bot helps you assess your test anxiety levels.\n\n"
-#         "It asks you a series of questions about your experiences with exam stress. "
-#         "Your responses are completely **anonymous** and will help in collecting valuable data for research purposes.\n\n"
-#         "The bot uses a simple 5-point scale to rate each question.\n\n"
-#         "Once you click **Start**, you'll begin the survey. The bot will guide you through the process!\n\n"
-#         "We appreciate your participation in this research! 😊\n\n"
-#         "Your answers are completely anonymous. 📊😊\n\n"
-#     )
-
-#     # Send the intro message
-#     try:
-#         await message.answer(intro_text, parse_mode="MarkdownV2")  # Use MarkdownV2 to be more lenient with escaping
-#     except Exception as e:
-#         await message.answer("Sorry, there was an error with the message formatting. Please try again.")
-#         print(f"Error sending intro message: {e}")
-
-#     # Now show the Start button after the intro message
-#     await message.answer(
-#         "When you're ready, click **Start** to begin the survey:",
-#         reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Start", callback_data="start_survey")]])
-#     )
-
-# @dp.callback_query(lambda call: call.data == "start_survey")
-# async def start_survey(call: types.CallbackQuery):
-#     user_id = call.from_user.id
-#     await call.answer()  # Acknowledge the callback
-#     await call.message.answer("Please enter your age:")  # Continue with survey
-
-
-
-# @dp.message(Command("start"))
-# async def start(message: types.Message):
-#     user_id = message.from_user.id
-#     user_responses[user_id] = {"responses": [], "start_time": time.time()}
-
-#     # Introductory text
-#     intro_text = (
-#         "🤖 **What can this bot do?**\n\n"
-#         "The Test Anxiety Bot helps you assess your test anxiety levels.\n\n"
-#         "It asks you a series of questions about your experiences with exam stress. "
-#         "Your responses are completely **anonymous** and will help in collecting valuable data for research purposes.\n\n"
-#         "The bot uses a simple 5-point scale to rate each question.\n\n"
-#         "Once you click **Start**, you'll begin the survey. The bot will guide you through the process!\n\n"
-#         "We appreciate your participation in this research! 😊\n\n"
-#         "Your answers are completely anonymous. 📊😊\n\n"
-#         "👨‍💻 Credit to: Jonas Yonas, developed by @Nexusoft_admin\n\n"
-#     )
-
-#     # Send the intro message
-#     await message.answer(intro_text, parse_mode="Markdown")
-
-#     # Now show the Start button after the intro message
-#     await message.answer(
-#         "When you're ready, click **Start** to begin the survey:",
-#         reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Start", callback_data="start_survey")]])
-#     )
-
-# @dp.callback_query(lambda call: call.data == "start_survey")
-# async def start_survey(call: types.CallbackQuery):
-#     user_id = call.from_user.id
-#     await call.answer()  # Acknowledge the callback
-#     await call.message.answer("Please enter your age:")  # Continue with survey
 
 
 @dp.message(Command("help"))
@@ -347,39 +220,6 @@ async def handle_response(call: types.CallbackQuery):
     else:
         await save_response(user_id)
 
-# async def save_response(user_id):
-#     if user_id not in user_responses or time.time() - user_responses[user_id]["start_time"] > SURVEY_EXPIRY_TIME:
-#         user_responses.pop(user_id, None)
-#         await bot.send_message(user_id, "Your session has expired. Please restart with /start.")
-#         return
-
-#     completion_time = time.time() - user_responses[user_id]["start_time"]
-#     response_data = [
-#         str(user_id),
-#         str(user_responses[user_id].get("age", "N/A")),
-#         str(user_responses[user_id].get("sex", "N/A"))
-#     ] + user_responses[user_id]["responses"] + [str(completion_time)]
-
-#     # Ensure response fits A-K (11 columns max)
-#     response_data = response_data[:14]
-
-#     if USE_GOOGLE_SHEETS:
-#         try:
-#             cell = sheet.find(str(user_id))
-#             if cell:
-#                 sheet.update(range_name=f"A{cell.row}:K{cell.row}", values=[response_data])
-#             else:
-#                 sheet.append_row(response_data)
-#         except APIError as e:
-#             print(f"API error while saving response: {e}")
-#             sheet.append_row(response_data)
-#     else:
-#         with open(CSV_FILE, mode="a", newline="") as file:
-#             writer = csv.writer(file)
-#             writer.writerow(response_data)
-
-#     del user_responses[user_id]
-#     await bot.send_message(user_id, "Thank you for completing the test! Your responses have been saved.")
 
 async def save_response(user_id):
     if user_id not in user_responses or time.time() - user_responses[user_id]["start_time"] > SURVEY_EXPIRY_TIME:
