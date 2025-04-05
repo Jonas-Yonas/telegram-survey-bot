@@ -129,7 +129,25 @@ async def start(message: types.Message):
 
     # Minimal start button - lets description do the explaining
     await message.answer(
-        "Ready when you are!",
+        "🤖 **Welcome to the Test Anxiety Bot!**\n\n"
+        "This bot will ask you a series of questions about test anxiety. "
+        "Please rate how true each statement is for you using the following **5-point scale**:\n\n"
+        "```\n"
+        "  5️⃣  Extremely or always true\n"
+        "  4️⃣  Highly or usually true\n"
+        "  3️⃣  Moderately or sometimes true\n"
+        "  2️⃣  Slightly or seldom true\n"
+        "  1️⃣  Not at all or never true\n"
+        "```\n"
+        "**📌 Commands:**\n"
+        "🔹 `/start` - Begin the survey\n"
+        "🔹 `/help` - Show this help message\n\n"
+        "**📋 How it works:**\n"
+        "1️⃣ The bot will ask a series of statements about test anxiety.\n"
+        "2️⃣ You will rate each statement based on the 5-point scale above.\n"
+        "3️⃣ Your responses are completely **anonymous** and stored securely.\n\n"
+        "Thank you for participating! 😊\n\n"
+        "👉 Ready when you are!",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(
                 text="▶️ BEGIN SURVEY", 
