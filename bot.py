@@ -5,6 +5,7 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.filters import Command
 import gspread
+from gspread.exceptions import APIError
 from oauth2client.service_account import ServiceAccountCredentials
 import time
 from dotenv import load_dotenv
@@ -13,7 +14,6 @@ import base64
 import json
 
 load_dotenv()
-
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 USE_GOOGLE_SHEETS = True
@@ -33,7 +33,6 @@ print("✅ Environment variables validated")
 
 # Improved Google Credentials Handling
 try:
-    # Handle both direct JSON and base64 encoded credentials
     if GOOGLE_CREDENTIALS_JSON and isinstance(GOOGLE_CREDENTIALS_JSON, str):
         if GOOGLE_CREDENTIALS_JSON.strip().startswith('{'):
             credentials_json = json.loads(GOOGLE_CREDENTIALS_JSON)
@@ -48,67 +47,52 @@ except Exception as e:
     logging.error(f"❌ Failed to load Google credentials: {str(e)}")
     raise
 
-# Initialize the bot
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
-# Google Sheets setup with full error handling
 if USE_GOOGLE_SHEETS:
     try:
-        # 1. Authentication
         scope = [
             "https://www.googleapis.com/auth/spreadsheets",
             "https://www.googleapis.com/auth/drive"
         ]
         creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_json, scope)
         client = gspread.authorize(creds)
-        
 
-        # 2. Spreadsheet access with multiple fallbacks
         try:
-            # Method 1: Try by exact title first
             spreadsheet = client.open(GOOGLE_SHEET_NAME)
             print(f"📊 Found spreadsheet by name: {GOOGLE_SHEET_NAME}")
         except gspread.SpreadsheetNotFound:
             try:
-                # Method 2: Try by URL if available
                 SPREADSHEET_URL = os.getenv("SPREADSHEET_URL")
                 if SPREADSHEET_URL:
                     spreadsheet = client.open_by_url(SPREADSHEET_URL)
                     print(f"🔗 Found spreadsheet by URL: {SPREADSHEET_URL}")
                 else:
-                    # Method 3: Create new spreadsheet
                     spreadsheet = client.create(GOOGLE_SHEET_NAME)
                     spreadsheet.share(credentials_json['client_email'], perm_type='user', role='writer')
                     print(f"🆕 Created new spreadsheet: {GOOGLE_SHEET_NAME}")
             except Exception as e:
                 raise Exception(f"All spreadsheet access methods failed: {str(e)}")
 
-        # 3. Worksheet access with multiple fallbacks
         try:
-            # Try to get Sheet1 first
             sheet = spreadsheet.sheet1
             print(f"📑 Using first worksheet: {sheet.title}")
-            
-            # Alternative: If you need specific worksheet name
-            # sheet = spreadsheet.worksheet("Data")  # Uncomment if needed
         except Exception as e:
             raise Exception(f"Worksheet access failed: {str(e)}")
-        
+
     except Exception as e:
         logging.error("❌ Critical Google Sheets setup error!")
         logging.error(f"Error details: {str(e)}")
         if hasattr(e, 'response'):
             logging.error(f"API response: {e.response.text}")
-        
-        # Create emergency CSV fallback
+
         USE_GOOGLE_SHEETS = False
         logging.warning("⚠️ Falling back to CSV storage")
         with open("emergency_fallback.csv", "w") as f:
             f.write("timestamp,error_details\n")
             f.write(f"{time.time()},{str(e)}\n")
         raise
-
 
 CSV_FILE = "responses.csv"
 questions = [
@@ -135,7 +119,6 @@ async def start(message: types.Message):
     user_responses[user_id] = {"responses": [], "start_time": time.time()}
     await message.answer("Please enter your age:")
 
-# Help Command Handler
 @dp.message(Command("help"))
 async def help_command(message: types.Message):
     help_text = (
@@ -186,7 +169,7 @@ async def ask_question(user_id, index):
         user_responses.pop(user_id, None)
         await bot.send_message(user_id, "Your session has expired. Please restart with /start.")
         return
-    
+
     if index < len(questions):
         await bot.send_message(user_id, f"Q{index+1}: {questions[index]}", reply_markup=create_rating_keyboard())
     else:
@@ -199,7 +182,7 @@ async def handle_response(call: types.CallbackQuery):
         user_responses.pop(user_id, None)
         await call.answer("Your session has expired. Please restart with /start.")
         return
-    
+
     user_responses[user_id]["responses"].append(call.data)
     await call.answer()
     if len(user_responses[user_id]["responses"]) < len(questions):
@@ -212,33 +195,36 @@ async def save_response(user_id):
         user_responses.pop(user_id, None)
         await bot.send_message(user_id, "Your session has expired. Please restart with /start.")
         return
-    
+
     completion_time = time.time() - user_responses[user_id]["start_time"]
     response_data = [
         str(user_id),
         str(user_responses[user_id].get("age", "N/A")),
         str(user_responses[user_id].get("sex", "N/A"))
     ] + user_responses[user_id]["responses"] + [str(completion_time)]
-    
+
+    # Ensure response fits A-K (11 columns max)
+    response_data = response_data[:11]
+
     if USE_GOOGLE_SHEETS:
         try:
             cell = sheet.find(str(user_id))
             if cell:
-                sheet.update(f"A{cell.row}:K{cell.row}", [response_data])
+                sheet.update(range_name=f"A{cell.row}:K{cell.row}", values=[response_data])
             else:
                 sheet.append_row(response_data)
-        except gspread.exceptions.CellNotFound:
+        except APIError as e:
+            print(f"API error while saving response: {e}")
             sheet.append_row(response_data)
     else:
         with open(CSV_FILE, mode="a", newline="") as file:
             writer = csv.writer(file)
             writer.writerow(response_data)
-    
+
     del user_responses[user_id]
     await bot.send_message(user_id, "Thank you for completing the test! Your responses have been saved.")
 
 async def cleanup_expired_sessions():
-    """Removes expired survey sessions every 10 seconds."""
     while True:
         current_time = time.time()
         expired_users = [user_id for user_id, data in user_responses.items() if current_time - data["start_time"] > SURVEY_EXPIRY_TIME]
@@ -248,12 +234,12 @@ async def cleanup_expired_sessions():
             try:
                 await bot.send_message(user_id, "Your session has expired. Please restart with /start.")
             except Exception:
-                pass  # Ignore errors if the user is unavailable
+                pass
 
-        await asyncio.sleep(10)  # Check every 10 seconds
+        await asyncio.sleep(10)
 
 async def main():
-    asyncio.create_task(cleanup_expired_sessions())  # Start cleanup task
+    asyncio.create_task(cleanup_expired_sessions())
     try:
         await dp.start_polling(bot)
     except Exception as e:
