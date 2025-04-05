@@ -145,46 +145,6 @@ def get_intro_text() -> str:
     )
 
 
-# @dp.message(Command("start"))
-# async def start(message: types.Message):
-#     user_id = message.from_user.id
-#     user_responses[user_id] = {"responses": [], "start_time": time.time()}
-
-#     # Minimal start button - lets description do the explaining
-#     await message.answer(
-#         "🤖 **Welcome to the Test Anxiety Bot!**\n\n"
-#         "This bot will ask you a series of questions about test anxiety. "
-#         "Please rate how true each statement is for you using the following **5-point scale**:\n\n"
-#         "```\n"
-#         "  5️⃣  Extremely or always true\n"
-#         "  4️⃣  Highly or usually true\n"
-#         "  3️⃣  Moderately or sometimes true\n"
-#         "  2️⃣  Slightly or seldom true\n"
-#         "  1️⃣  Not at all or never true\n"
-#         "```\n"
-#         "**📌 Commands:**\n"
-#         "🔹 `/start` - Begin the survey\n"
-#         "🔹 `/help` - Show this help message\n\n"
-#         "**📋 How it works:**\n"
-#         "1️⃣ The bot will ask a series of statements about test anxiety.\n"
-#         "2️⃣ You will rate each statement based on the 5-point scale above.\n"
-#         "3️⃣ Your responses are completely **anonymous** and stored securely.\n\n"
-#         "Thank you for participating! 😊\n\n"
-#         "👉 Ready when you are!",
-#         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-#             [InlineKeyboardButton(
-#                 text="▶️ BEGIN SURVEY", 
-#                 callback_data="start_survey"
-#             )]
-#         ])
-#     )
-
-# @dp.callback_query(lambda call: call.data == "start_survey")
-# async def start_survey(call: types.CallbackQuery):
-#     await call.answer()
-#     await call.message.delete()  # Clean up the button message
-#     await call.message.answer("First, please tell me your age:")
-
 @dp.message(Command("start"))
 async def start(message: types.Message):
     user_id = message.from_user.id
@@ -208,31 +168,6 @@ async def start_survey(call: types.CallbackQuery):
 async def help_command(message: types.Message):
     await message.answer(get_intro_text(), parse_mode="Markdown")
 
-
-# @dp.message(Command("help"))
-# async def help_command(message: types.Message):
-#     help_text = (
-#         "🤖 **Welcome to the Test Anxiety Bot!**\n\n"
-#         "This bot will ask you a series of questions about test anxiety. "
-#         "Please rate how true each statement is for you using the following **5-point scale**:\n\n"
-#         "```\n"
-#         "  5️⃣  Extremely or always true\n"
-#         "  4️⃣  Highly or usually true\n"
-#         "  3️⃣  Moderately or sometimes true\n"
-#         "  2️⃣  Slightly or seldom true\n"
-#         "  1️⃣  Not at all or never true\n"
-#         "```\n"
-#         "**📌 Commands:**\n"
-#         "🔹 `/start` - Begin the survey\n"
-#         "🔹 `/help` - Show this help message\n\n"
-#         "**📋 How it works:**\n"
-#         "1️⃣ The bot will ask a series of statements about test anxiety.\n"
-#         "2️⃣ You will rate each statement based on the 5-point scale above.\n"
-#         "3️⃣ Your responses are completely **anonymous** and stored securely.\n\n"
-#         "Thank you for participating! 😊\n"
-#         "👉 **Start the survey now:** /start"
-#     )
-#     await message.answer(help_text, parse_mode="Markdown")
 
 @dp.message()
 async def handle_age(message: types.Message):
