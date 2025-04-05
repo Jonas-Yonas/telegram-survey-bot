@@ -198,6 +198,12 @@ async def start(message: types.Message):
         ])
     )
 
+@dp.callback_query(lambda call: call.data == "start_survey")
+async def start_survey(call: types.CallbackQuery):
+    await call.answer()
+    await call.message.delete()  # Clean up the button message
+    await call.message.answer("First, please tell me your age:")
+
 @dp.message(Command("help"))
 async def help_command(message: types.Message):
     await message.answer(get_intro_text(), parse_mode="Markdown")
